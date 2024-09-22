@@ -5,15 +5,13 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type mineStruct struct {
-	minesMatrix    [][]bool
-	totalMines     int
-	remainingMines int
+	minesMatrix [][]bool
+	totalMines  int
 }
 
 type Pair struct {
@@ -23,13 +21,32 @@ type Pair struct {
 
 func mineRoutes(r *gin.Engine) {
 	mineGroup := r.Group("/api/mine")
-	mineGroup.POST("/clicked/:totalmines/:remainingMines/:minesMatrix", ConfigureTOGiveMineOrDiamond)
+	mineGroup.POST("/clicked/:totalmines/:minesMatrix/:clickedCoords", ConfigureTOGiveMineOrDiamond)
 }
 
 // all win condition 100% win rate condtion
+// check and put the mines in the random postion which wasn't clicked
+func winCondtion(totalMines int, minesMatrix [][]bool) [][]bool {
+	var filter []Pair
+	count := 0
+	for i := 0; i < len(minesMatrix); i++ {
+		for j := 0; j < len(minesMatrix[i]); j++ {
+			if count == totalMines {
+				break
+			}
+			if minesMatrix[i][j] == true {
+				filter = append(filter, Pair{first: i, second: j})
+				count++
+			}
+		}
+	}
 
-func winCondtion() string {
-	return "win"
+	for i := 0; i < len(filter); i++ {
+		minesMatrix[filter[i].first][filter[i].second] = false
+	}
+
+	return minesMatrix
+
 }
 
 // all lose condition  losing algortithm 0 percent win condition
@@ -60,26 +77,33 @@ func WinFromLuck(remainingMines int, totalmines int, mineMatrix [][]bool) [][]bo
 
 func ConfigureTOGiveMineOrDiamond(r *gin.Context) {
 	totalMinesStr := r.Param("totalmines")
-	remainingMinesStr := r.Param("remainingMines")
-	minesMatrix := r.Param("minesMatrix")
-	var matrix [][]bool
+	minesMatrixStr := r.Param("minesMatrix")
+	clickedCoordsStr := r.Param("clickedCoords")
 
-	err := json.Unmarshal([]byte(minesMatrix), &matrix)
 	totalMines, err := strconv.Atoi(totalMinesStr)
-
 	if err != nil {
-		r.JSON(http.StatusBadRequest, gin.H{"error": "invalid value from the mines"})
+		r.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for totalMines"})
 		return
 	}
 
-	remainingMines, err := strconv.Atoi(remainingMinesStr)
+	var minesMatrix [][]bool
+	err = json.Unmarshal([]byte(minesMatrixStr), &minesMatrix)
 	if err != nil {
-		r.JSON(http.StatusBadRequest, gin.H{"error": "invalid value from the remaining mines"})
-	}
-	WinFromLuck(int(remainingMines), int(totalMines), matrix)
-
-	if remainingMines == 0 {
+		r.JSON(http.StatusBadRequest, gin.H{"error": "invalid minesMatrix format"})
 		return
 	}
+
+	var coords [][]Pair
+	err = json.Unmarshal([]byte(clickedCoordsStr), &coords)
+	if err != nil {
+		r.JSON(http.StatusBadRequest, gin.H{"error": "invalid clickedCoords format"})
+		return
+	}
+
+	r.JSON(http.StatusOK, gin.H{
+		"totalMines":    totalMines,
+		"minesMatrix":   minesMatrix,
+		"clickedCoords": coords,
+	})
 
 }
