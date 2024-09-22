@@ -2,10 +2,12 @@ package game
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type mineStruct struct {
@@ -37,20 +39,23 @@ func loseCondtion() string {
 }
 
 // probabilty condtion  fair play alogrithm
-func WinFromLuck(remainingMines int, totalmines int, mineMatrix [][]bool) {
-	mpp := make(map[Pair]int)
-	count := 0
-	for i := 0; i < totalmines; i++ {
-		x := rand.Intn(len(mineMatrix))
-		y := rand.Intn(len(mineMatrix))
-		if value, exists := mpp[Pair{first: x, second: y}]; exists {
-			continue
-		} else {
-			count++
-			mineMatrix[x-1][y-1] = false
-			mpp[Pair{first: x, second: y}]++
+func WinFromLuck(remainingMines int, totalmines int, mineMatrix [][]bool) [][]bool {
+	var allPairs []Pair
+	for i := 0; i < len(mineMatrix); i++ {
+		for j := 0; j < len(mineMatrix[0]); j++ {
+			allPairs = append(allPairs, Pair{first: i, second: j})
 		}
 	}
+	rand.Shuffle(len(allPairs), func(i, j int) {
+		allPairs[i], allPairs[j] = allPairs[j], allPairs[i]
+	})
+
+	for i := 0; i < totalmines; i++ {
+		x := allPairs[i].first
+		y := allPairs[i].second
+		mineMatrix[x][y] = false
+	}
+	return mineMatrix
 }
 
 func ConfigureTOGiveMineOrDiamond(r *gin.Context) {
