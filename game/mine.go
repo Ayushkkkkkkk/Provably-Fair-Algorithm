@@ -2,16 +2,15 @@ package game
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
-type mineStruct struct {
-	minesMatrix [][]bool
-	totalMines  int
+type MineStruct struct {
+	MinesMatrix [][]bool `json:"minesmatrix"`
+	TotalMines  int      `json:"totalmines"`
 }
 
 type Pair struct {
