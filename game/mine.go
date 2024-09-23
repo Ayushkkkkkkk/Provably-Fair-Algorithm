@@ -44,15 +44,21 @@ func winCondtion(totalMines int, minesMatrix [][]bool) [][]bool {
 	for i := 0; i < len(filter); i++ {
 		minesMatrix[filter[i].first][filter[i].second] = false
 	}
-
 	return minesMatrix
 
 }
 
-// all lose condition  losing algortithm 0 percent win condition
-
-func loseCondtion() string {
-	return "lose"
+// deciding to make player lose on a basis of random number at every turn n
+func randmonEstimationForLossOrWin(clickedCoods Pair, mineMatrix [][]bool) [][]bool {
+	MakeThePlayerLoseAt := rand.Intn(len(mineMatrix)*len(mineMatrix) - 1)
+	for i := 0; i <= MakeThePlayerLoseAt; i++ {
+		if i != MakeThePlayerLoseAt {
+			mineMatrix[clickedCoods.first][clickedCoods.second] = true
+		} else {
+			mineMatrix[clickedCoods.first][clickedCoods.second] = false
+		}
+	}
+	return mineMatrix
 }
 
 // probabilty condtion  fair play alogrithm
