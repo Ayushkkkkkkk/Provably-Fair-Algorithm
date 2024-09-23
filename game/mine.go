@@ -18,6 +18,12 @@ type Pair struct {
 	second int
 }
 
+type Tuple struct {
+	first  int
+	second int
+	third  int
+}
+
 func mineRoutes(r *gin.Engine) {
 	mineGroup := r.Group("/api/mine")
 	mineGroup.POST("/clicked/:totalmines/:minesMatrix/:clickedCoords", ConfigureTOGiveMineOrDiamond)
@@ -48,13 +54,29 @@ func winCondtion(totalMines int, minesMatrix [][]bool) [][]bool {
 }
 
 // deciding to make player lose on a basis of random number at every turn n
-func randmonEstimationForLossOrWin(clickedCoods Pair, mineMatrix [][]bool) [][]bool {
+func randmonEstimationForLossOrWin(totalMines int, clickedCoods Pair, mineMatrix [][]bool) [][]bool {
 	MakeThePlayerLoseAt := rand.Intn(len(mineMatrix)*len(mineMatrix) - 1)
+	count := 0
+	var unClickedTiles []Pair
 	for i := 0; i <= MakeThePlayerLoseAt; i++ {
 		if i != MakeThePlayerLoseAt {
 			mineMatrix[clickedCoods.first][clickedCoods.second] = true
 		} else {
+			count++
 			mineMatrix[clickedCoods.first][clickedCoods.second] = false
+			break
+		}
+	}
+	for i := 0; i < len(mineMatrix); i++ {
+		for j := 0; j < len(mineMatrix); j++ {
+			if count == totalMines {
+				return mineMatrix
+			} else {
+				if mineMatrix[i][j] == true {
+					mineMatrix[i][j] = false
+					count++
+				}
+			}
 		}
 	}
 	return mineMatrix
