@@ -9,8 +9,7 @@ import (
 )
 
 type MineStruct struct {
-	MinesMatrix [][]bool `json:"minesmatrix"`
-	TotalMines  int      `json:"totalmines"`
+	MinesMatrix [][]bool `json:"matrix"`
 }
 
 type Pair struct {
