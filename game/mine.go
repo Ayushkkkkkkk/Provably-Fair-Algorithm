@@ -18,12 +18,6 @@ type Pair struct {
 	second int
 }
 
-type Tuple struct {
-	first  int
-	second int
-	third  int
-}
-
 func mineRoutes(r *gin.Engine) {
 	mineGroup := r.Group("/api/mine")
 	mineGroup.POST("/clicked/:totalmines/:minesMatrix/:clickedCoords", ConfigureTOGiveMineOrDiamond)
